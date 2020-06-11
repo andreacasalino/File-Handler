@@ -62,6 +62,36 @@ ostream& operator<<(ostream& stream, const file_handler& contents){
     return stream;
 }
 
+
+
+void check_for_split(list<string>& source, list<string>::iterator& line){
+    list<size_t> split_pos;
+    size_t k,K=(*line).size();
+    for(k=0;k<K; ++k){
+        if((*line)[k] == '\n') split_pos.push_back(k);
+    }
+    if(split_pos.empty()) return;
+
+    auto next = line;
+    ++next;
+
+    split_pos.push_back(K);
+    K = split_pos.size() - 1;
+    auto it_pos = split_pos.begin();
+    auto it_pos_next = it_pos;
+    ++it_pos_next;
+    for(k=0; k<K; ++k){
+        string temp(*line , *it_pos + 1, *it_pos_next - *it_pos -1);
+        source.insert(next, temp);
+        ++it_pos;
+        ++it_pos_next;
+    }
+
+    *line = string(*line, 0, split_pos.front());
+}
+
+
+
 std::string file_handler::pack(const std::list<std::string>& to_pack){
     std::string packed;
     auto it=to_pack.begin();
@@ -74,9 +104,18 @@ std::string file_handler::pack(const std::list<std::string>& to_pack){
     return move(packed);
 };
 
-void file_handler::push_back(const std::string& to_add){ this->__contents.emplace_back(to_add); }
+void file_handler::push_back(const std::string& to_add){ 
+    this->__contents.emplace_back(to_add); 
+    auto end = this->__contents.end();
+    --end;
+    check_for_split(this->__contents, end);
+}
 
-void file_handler::push_front(const std::string& to_add){ this->__contents.emplace_front(to_add); }
+void file_handler::push_front(const std::string& to_add){ 
+    this->__contents.emplace_front(to_add); 
+    auto start = this->__contents.begin();
+    check_for_split(this->__contents, start);
+}
 
 
 
@@ -106,7 +145,10 @@ list<list<string>::iterator> find(std::list<std::string>& contents, const string
 
 void file_handler::replace_line(const std::string& to_remove, const std::string& to_put, const size_t& istances){
     auto pos = find(this->__contents , to_remove, istances);
-    for(auto it = pos.begin(); it!=pos.end(); ++it) **it = to_put;
+    for(auto it = pos.begin(); it!=pos.end(); ++it)  {
+        **it = to_put;
+        check_for_split(this->__contents, *it);
+    }
 }
 
 void file_handler::remove_line(const std::string& to_remove, const size_t& istances){
@@ -118,6 +160,9 @@ void file_handler::add_before(const std::string& involved_line, const std::strin
     auto pos = find(this->__contents , involved_line, istances);
     for(auto it = pos.begin(); it!=pos.end(); ++it) {
         this->__contents.insert(*it, to_put);
+        auto it_prev =*it;
+        --it_prev;
+        check_for_split(this->__contents, it_prev);
     }
 }
 
@@ -127,6 +172,9 @@ void file_handler::add_after(const std::string& involved_line, const std::string
         auto it_temp = *it;
         ++it_temp;
         this->__contents.insert(it_temp, to_put);
+        auto it_prev = it_temp;
+        --it_prev;
+        check_for_split(this->__contents, it_prev);
     }
 }
 

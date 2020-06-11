@@ -1,3 +1,10 @@
+/**
+ * Author:    Andrea Casalino
+ * Created:   01.06.2020
+*
+* report any bug to andrecasa91@gmail.com.
+**/
+
 #include "../src/file_handler.h"
 #include <iostream>
 using namespace std;
