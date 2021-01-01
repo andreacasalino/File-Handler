@@ -5,9 +5,10 @@
 * report any bug to andrecasa91@gmail.com.
 **/
 
-#include "../src/file_handler.h"
+#include <file_handler.h>
 #include <iostream>
 using namespace std;
+using namespace fh;
 
 int main(){
     //init empty contents
