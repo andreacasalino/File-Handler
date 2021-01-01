@@ -5,31 +5,37 @@
 * report any bug to andrecasa91@gmail.com.
 **/
 
-#include <file_handler.h>
+#include <FileHandler.h>
 #include <iostream>
 using namespace std;
 using namespace fh;
 
 int main(){
     //init empty contents
-    file_handler handler;
+    FileHandler handler;
 
     //add some lines
-    handler.push_back("This file");
-    handler.push_back("was generated from");
-    handler.push_back("a C++ application");
-    handler.push_back("This library is cool");
+    handler.pushBack("This file");
+    handler.pushBack("was generated from");
+    handler.pushBack("a C++ application");
+    handler.pushBack("This library is cool");
+    handler.pushBack(FileHandler::pack("variadic args", "are easily", "handled"));
 
     //display the contents
     cout << handler << endl << endl;
 
     //add a smiling face before the last line
-    handler.add_before( handler.get_contents().back(), "     :)     ");
+    handler.addBefore( handler.getContents().back(), "     :)     ");
 
     //print in a file
     handler.reprint("generated_file");
 
     //check the content of generated_file
+
+    //pass the entire file content to a string stream
+    std::stringstream stream;
+    stream << handler;
+    cout << stream.str() << endl;
 
     return 0;
 }

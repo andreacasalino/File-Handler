@@ -5,22 +5,16 @@
 * report any bug to andrecasa91@gmail.com.
 **/
 
-#include <file_handler.h>
+#include <FileHandler.h>
 #include <fstream>
-#include <iostream>
 using namespace std;
 
 namespace fh {
-    file_handler::file_handler() { }
-
-    file_handler::file_handler(const std::string& file_location) : file_handler() {
+    FileHandler::FileHandler(const std::string& file_location) : FileHandler() {
         ifstream f(file_location);
         if(!f.is_open()) {
-    #ifdef ENABLE_COUT_WARNING
-            cout << "unable to open file\n";
-    #endif
             f.close();
-            throw 0; 
+            return; 
         }
         while (!f.eof()){
             this->__contents.emplace_back();
@@ -29,41 +23,32 @@ namespace fh {
         f.close();
     }
 
-    file_handler::file_handler(const file_handler& o) : __contents(o.__contents) {};
-
-    void file_handler::operator=(const file_handler& o){ this->__contents = o.__contents; }
-
-    const string& file_handler::operator[](const size_t& line_number) const{
-        cout << "size : " << this->__contents.size() << endl;
-        if(line_number >= this->__contents.size()) throw 0; //inexistent line
+    const string& FileHandler::operator[](const size_t& line_number) const{
+        if(line_number >= this->__contents.size()) throw std::runtime_error("line_number out of bounds");
         auto it=this->__contents.begin();
         advance(it, line_number);
         return *it;
     }
 
-    void file_handler::reprint(const std::string& file_location) const {
+    void FileHandler::reprint(const std::string& file_location) const {
         ofstream f(file_location);
         if(!f.is_open()) {
-    #ifdef ENABLE_COUT_WARNING
-            cout << "unable to create file\n";
-    #endif
             f.close();
-            throw 0; 
+            return; 
         }
         f << *this;
         f.close();
     }
 
-    ostream& operator<<(ostream& stream, const file_handler& contents){
-        auto lines = contents.get_contents();
-        auto it=lines.begin();
-        stream << *it;
-        ++it;
-        for(it; it!=lines.end(); ++it) stream << endl << *it;
+    ostream& operator<<(ostream& stream, const FileHandler& contents){
+        contents.passToStream<ostream>(stream);
         return stream;
     }
 
-
+    std::stringstream& operator<<(std::stringstream& stream, const FileHandler& contents) {
+        contents.passToStream<stringstream>(stream);
+        return stream;
+    }
 
     void check_for_split(list<string>& source, list<string>::iterator& line){
         list<size_t> split_pos;
@@ -91,34 +76,39 @@ namespace fh {
         *line = string(*line, 0, split_pos.front());
     }
 
-
-
-    std::string file_handler::pack(const std::list<std::string>& to_pack){
-        std::string packed;
-        auto it=to_pack.begin();
-        packed += *it;
-        ++it;
-        for( it; it!=to_pack.end(); ++it) {
-            packed += "\n"; 
-            packed += *it;
+    std::string FileHandler::pack(const std::list<std::string>& to_pack){
+        std::stringstream temp;
+        if(!to_pack.empty()) {
+            auto it = to_pack.begin();
+            temp << '\n' << *it;
+            ++it;
+            for(it; it!=to_pack.end(); ++it) {
+                temp << *it;
+            }
         }
-        return move(packed);
+        return temp.str();
     };
 
-    void file_handler::push_back(const std::string& to_add){ 
+    void FileHandler::pack(std::stringstream& stream, const std::string& val) {
+        stream << val;
+    }
+
+    void FileHandler::pack(std::stringstream& stream, const char* val) {
+        stream << val;
+    }
+
+    void FileHandler::pushBack(const std::string& to_add){ 
         this->__contents.emplace_back(to_add); 
         auto end = this->__contents.end();
         --end;
         check_for_split(this->__contents, end);
     }
 
-    void file_handler::push_front(const std::string& to_add){ 
+    void FileHandler::pushFront(const std::string& to_add){ 
         this->__contents.emplace_front(to_add); 
         auto start = this->__contents.begin();
         check_for_split(this->__contents, start);
     }
-
-
 
     list<list<string>::iterator> find(std::list<std::string>& contents, const string& to_find, const size_t& istances){
         list<list<string>::iterator> positions;
@@ -142,9 +132,7 @@ namespace fh {
         return positions;
     };
 
-
-
-    void file_handler::replace_line(const std::string& to_remove, const std::string& to_put, const size_t& istances){
+    void FileHandler::replaceLine(const std::string& to_remove, const std::string& to_put, const size_t& istances){
         auto pos = find(this->__contents , to_remove, istances);
         for(auto it = pos.begin(); it!=pos.end(); ++it)  {
             **it = to_put;
@@ -152,12 +140,12 @@ namespace fh {
         }
     }
 
-    void file_handler::remove_line(const std::string& to_remove, const size_t& istances){
+    void FileHandler::removeLine(const std::string& to_remove, const size_t& istances){
         auto pos = find(this->__contents , to_remove, istances);
         for(auto it = pos.begin(); it!=pos.end(); ++it) this->__contents.erase(*it);
     }
 
-    void file_handler::add_before(const std::string& involved_line, const std::string& to_put, const size_t& istances){
+    void FileHandler::addBefore(const std::string& involved_line, const std::string& to_put, const size_t& istances){
         auto pos = find(this->__contents , involved_line, istances);
         for(auto it = pos.begin(); it!=pos.end(); ++it) {
             this->__contents.insert(*it, to_put);
@@ -167,7 +155,7 @@ namespace fh {
         }
     }
 
-    void file_handler::add_after(const std::string& involved_line, const std::string& to_put, const size_t& istances){
+    void FileHandler::addAfter(const std::string& involved_line, const std::string& to_put, const size_t& istances){
         auto pos = find(this->__contents , involved_line, istances);
         for(auto it = pos.begin(); it!=pos.end(); ++it) {
             auto it_temp = *it;

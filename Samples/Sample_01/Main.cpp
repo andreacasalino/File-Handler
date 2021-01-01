@@ -5,20 +5,20 @@
 * report any bug to andrecasa91@gmail.com.
 **/
 
-#include <file_handler.h>
+#include <FileHandler.h>
 #include <iostream>
 using namespace std;
 using namespace fh;
 
 int main(){
     //read the contents of a file
-    file_handler handler("lorem_ipsum");
+    FileHandler handler("lorem_ipsum");
 
     //display the contents
     cout << handler << endl << endl;
 
     //add some lines after the 4th line
-    handler.add_after(handler[3], "------------- inserted line -----------------");
+    handler.addAfter(handler[3], "------------- inserted line -----------------");
 
     //display the contents
     cout << handler << endl << endl;
