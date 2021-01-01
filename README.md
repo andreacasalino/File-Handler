@@ -1,10 +1,5 @@
-This repository contains a class named file_handler usefull for modifying textual file from C++ code.
-You can do add, remove and replace operations of any kind.
+This **C++** package contains usefull utilities for modifying textual files.
+You can perform **add**, **remove** and **replace** operations of any kind.
 
-The sources are contained in the folder ./src/.
+Use [CMake](https://cmake.org) to configure and compile the library as well as the examples
 
-Check the examples contained in Sample_01, Sample_02 and Sample_03.
-You can compile them using:
-	-Windows: compile.bat
-	-Linux:   compile.sh
-The binaries are created in the samples folders and must be launched from there.
